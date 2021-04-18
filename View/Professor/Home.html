@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Főoldal</title>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link rel="stylesheet" type="text/css" href="../../CSS/fonts/all.css">
+    <link rel="stylesheet" type="text/css" href="../../CSS/global.css">
+    <link rel="stylesheet" type="text/css" href="../../CSS/course.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <script src="../../Javascript/loadcourse.js"></script>
+    <script src="../../Javascript/sessioncheck.js"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #b2ccdf;">
+        <a class="navbar-brand" href="Home.html"><img class="logo" src="../../CSS/images/logo2.png" alt="logo"></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="Home.html">Kezdőlap</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="CreateCourse.html">Tárgy létrehozás</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="ModifyCourse.html">Tárgy módosítása</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Üzenetek</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div id="courses-container">
+
+    </div>
+
+    <!-- Modalstudents -->
+    <div id="StudentList" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-xl">
+
+            <div class="modal-content">
+                <div class="modal-header stud-modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        &times;</button>
+
+                </div>
+                <div class="modal-body stud-modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="upd" class="btn btn-primary" onclick="updateAttends()">Frissítés</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Bezárás</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modalfiles -->
+    <div id="Documents" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-xl">
+
+            <div class="modal-content">
+                <div class="modal-header doc-modal-header">
+
+                </div>
+                <div class="modal-body doc-modal-body">
+
+                </div>
+                <div class="modal-footer doc">
+                    <div class="input-group ">
+                        <div class="custom-file">
+                            <input type="file" class="form-control" id="fileid">
+                        </div>
+                        <div class="input-group-append">
+                            <span class="input-group-text" onclick="uploadFile()">Feltöltés</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="$('#fileid').val('');"
+                        data-dismiss="modal">Bezárás</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modalmodify -->
+    <div id="Coursedata" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-xl">
+
+            <div class="modal-content">
+                <div class="modal-header course-modal-header">
+
+                </div>
+                <div class="modal-body course-modal-body">
+                    <div class="container">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <u>
+                                    <h3>Tárgy adatok</h3>
+                                </u>
+                                <div class="form-group">
+                                    <label>Tárgykód</label>
+                                    <input type="text" name="lecturecode" class="form-control form-data-item"
+                                        placeholder="Tárgykód*">
+                                </div>
+                                <div class="form-group">
+                                    <label>Tárgy neve</label>
+                                    <input type="text" name="lecturename" class="form-control form-data-item"
+                                        placeholder="Tárgy neve*">
+                                </div>
+                                <div class="form-group">
+                                    <label>Leírás a tárgyról</label>
+                                    <textarea name="lecturedescr" class="form-control form-data-item"
+                                        placeholder="Leírás*"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <u>
+                                    <h3>Követelmények</h3>
+                                </u>
+
+                                <div class="form-group">
+                                    <input type="checkbox" name="lecturecheckbox" />
+                                    <label>Előadás</label>
+                                    <div id="showlecture">
+                                        <input class="form-control form-data-item" name="lecturemax" type="text"
+                                            placeholder="Összes óraszám*" />
+                                        <input class="form-control form-data-item" name="lecturemin" type="text"
+                                            placeholder="Minimum kötelező*" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <input type="checkbox" name="practicecheckbox" />
+                                    <label>Gyakorlat</label>
+                                    <div id="showpractice">
+                                        <input class="form-control form-data-item" name="practicemax" type="text"
+                                            placeholder="Összes óraszám*" />
+                                        <input class="form-control form-data-item" name="practicemin" type="text"
+                                            placeholder="Minimum kötelező*" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <input type="checkbox" name="firstzhcheckbox" />
+                                    <label>I. ZH</label>
+                                    <div id="showfirstzh">
+                                        <input class="form-control form-data-item" name="firstzhmax" type="text"
+                                            placeholder="Max pontszám*" />
+                                        <input class="form-control form-data-item" name="firstzhmin" type="text"
+                                            placeholder="Minimum pontszám*" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <input type="checkbox" name="secondzhcheckbox" />
+                                    <label>II. ZH</label>
+                                    <div id="showsecondzh">
+                                        <input class="form-control form-data-item" name="secondzhmax" type="text"
+                                            placeholder="Max pontszám*" />
+                                        <input class="form-control form-data-item" name="secondzhmin" type="text"
+                                            placeholder="Minimum pontszám*" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <input value="false" class="form-data-item" type="checkbox"
+                                        name="homeworkcheckbox" />
+                                    <label>Félévközi feladat</label>
+
+                                </div>
+
+
+
+
+                            </div>
+                        </div>
+                        <input type="submit" class="btnSubmit" value="Létrehozás" onclick="CreateCourse()" />
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="updateAttends()">Módosítás</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Bezárás</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,12 @@
+html {
+   min-height: 100%;
+}
+body {
+  background-image: url('images/background_blue.jpg');  
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;  
+}
+.logo{
+  width:45%;
+}
