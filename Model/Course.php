@@ -127,28 +127,23 @@ class Course extends DbConnect
 
     public function loadCourseDetails($courseid)
     {
+
         $mysqliconnect = $this->connect();
         $selectCourseDetailsSql = "SELECT course_id, course_name, course_description FROM `course` WHERE course_id = '" . $courseid . "'";
         $detailsresult = $mysqliconnect->query($selectCourseDetailsSql);
-
         $data = (object) [
-            'coursedetails' => ""
+            'coursedetails' => new stdClass()
         ];
+        $data->coursedetails = $detailsresult->fetch_object();
+        $selectRequirement = "SELECT requirement_type, max_requirement, min_requirement FROM `course_requirement` WHERE course_id = '" . $courseid . "' ORDER BY
+                    CASE requirement_type WHEN 'ATTENDANCE_LECTURE' THEN 1 WHEN 'ATTENDANCE_PRACTICE' THEN 2 WHEN 'FIRSTZH' THEN 3 WHEN 'SECONDZH' THEN 4 WHEN 'HOMEWORK' THEN 5 END";
+        $requirementsresult = $mysqliconnect->query($selectRequirement);
+        $data->coursedetails->requirementlist = array();
 
-
-        while ($coursedetailsobj = $detailsresult->fetch_object()) {
-            $data->coursedetails->courseid = $coursedetailsobj['course_id'];
-            $data->coursedetails->courseid = $coursedetailsobj['course_name'];
-            $data->coursedetails->courseid = $coursedetailsobj['course_description'];
-            $selectRequirement = "SELECT requirement_type, max_requirement, min_requirement FROM `course_requirement` WHERE course_id = '" . $courseid . "' ORDER BY
-                CASE requirement_type WHEN 'ATTENDANCE_LECTURE' THEN 1 WHEN 'ATTENDANCE_PRACTICE' THEN 2 WHEN 'FIRSTZH' THEN 3 WHEN 'SECONDZH' THEN 4 WHEN 'HOMEWORK' THEN 5 END";
-            $requirementsresult = $mysqliconnect->query($selectRequirement);
-            $data->coursedetails->requirementlist = array();
-
-            while ($requirementlistobj = $requirementsresult->fetch_object()) {
-                array_push($data->coursedetails->requirementlist, $requirementlistobj);
-            }
+        while ($requirementlistobj = $requirementsresult->fetch_object()) {
+            array_push($data->coursedetails->requirementlist, $requirementlistobj);
         }
+
         return $data;
     }
 }

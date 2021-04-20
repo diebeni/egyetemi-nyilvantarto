@@ -66,8 +66,10 @@
                     <input type="checkbox" name="lecturecheckbox" />
                     <label>Előadás</label>
                     <div id="showlecture">
+                        <label>Összes óraszám</label>
                         <input class="form-control form-data-item" name="lecturemax" type="text"
-                            placeholder="Összes óraszám*" />
+                            placeholder="Összes óraszám*" /></br>
+                        <label>Minimum kötelező</label>
                         <input class="form-control form-data-item" name="lecturemin" type="text"
                             placeholder="Minimum kötelező*" />
                     </div>
@@ -77,8 +79,10 @@
                     <input type="checkbox" name="practicecheckbox" />
                     <label>Gyakorlat</label>
                     <div id="showpractice">
+                        <label>Összes óraszám</label>
                         <input class="form-control form-data-item" name="practicemax" type="text"
-                            placeholder="Összes óraszám*" />
+                            placeholder="Összes óraszám*" /></br>
+                        <label>Minimum kötelező</label>
                         <input class="form-control form-data-item" name="practicemin" type="text"
                             placeholder="Minimum kötelező*" />
                     </div>
@@ -88,8 +92,10 @@
                     <input type="checkbox" name="firstzhcheckbox" />
                     <label>I. ZH</label>
                     <div id="showfirstzh">
+                        <label>I. ZH max pontszám</label>
                         <input class="form-control form-data-item" name="firstzhmax" type="text"
-                            placeholder="Max pontszám*" />
+                            placeholder="Max pontszám*" /></br>
+                        <label>I. ZH minimum pontszám</label>
                         <input class="form-control form-data-item" name="firstzhmin" type="text"
                             placeholder="Minimum pontszám*" />
                     </div>
@@ -99,8 +105,10 @@
                     <input type="checkbox" name="secondzhcheckbox" />
                     <label>II. ZH</label>
                     <div id="showsecondzh">
+                        <label>II. ZH max pontszám</label>
                         <input class="form-control form-data-item" name="secondzhmax" type="text"
-                            placeholder="Max pontszám*" />
+                            placeholder="Max pontszám*" /></br>
+                        <label>II. ZH minimum pontszám</label>
                         <input class="form-control form-data-item" name="secondzhmin" type="text"
                             placeholder="Minimum pontszám*" />
                     </div>
@@ -111,13 +119,12 @@
                     <label>Félévközi feladat</label>
 
                 </div>
-
+                <input type="submit" class="btnSubmit" value="Létrehozás" onclick="CreateCourse()" />
 
 
 
             </div>
         </div>
-        <input type="submit" class="btnSubmit" value="Létrehozás" onclick="CreateCourse()" />
 
     </div>
     <!-- Modal -->

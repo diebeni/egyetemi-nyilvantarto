@@ -65,7 +65,6 @@ function CreateCourse() {
         },
         success: function (data) {
             if (data == true) {
-                // document.getElementById("SuccesUpload").innerHTML += '<div>lófasz</div>';
                 $('#SuccesUpload').modal('show');
             }
 
