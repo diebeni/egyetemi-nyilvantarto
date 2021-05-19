@@ -15,7 +15,7 @@ if (isset($_POST['functionId']) && isset($_POST['neptun']) && isset($_POST['pswd
 function checkStudentLogin($neptun, $pswd)
 {
     $student = new Student();
-    $student->login($neptun, $pswd);
+    echo json_encode($student->login($neptun, $pswd));
 }
 
 function checkProfessorLogin($neptun, $pswd)

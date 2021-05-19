@@ -5,59 +5,72 @@ require_once('../Database/DbConnect.php');
 class Course extends DbConnect
 {
 
-    public function insertCourseData($data)
+    public function validateRequirement($min, $max)
+    {
+        if (!is_numeric($min) || !is_numeric($max) || $min < 0 || $max < 0) {
+            throw new Exception('A követelmények csak 0-tól nagyobb számok lehetnek !');
+        }
+        if ($min == "" || $max == "") {
+            throw new Exception('Hiányzik a minimum vagy maximum érték!');
+        }
+        if ($min > $max) {
+            throw new Exception('A minimum óraszám/pontszám nagyobb mint az összes!');
+        }
+    }
+
+    public function insertCourseData($course)
     {
         session_start();
         $all_query_ok = true;
         $mysqliconnect = $this->connect();
         $mysqliconnect->autocommit(FALSE);
-        if (
-            isset($data['lecturecode']) && $data['lecturecode'] != ""
-            && isset($data['lecturename']) && $data['lecturename'] != ""
-            && isset($data['lecturedescr']) && $data['lecturedescr'] != ""
-        ) {
-            $insertCourseDataSql = "INSERT into course VALUES ('" . mysqli_real_escape_string($mysqliconnect, $data['lecturecode']) . "',
-            '" . mysqli_real_escape_string($mysqliconnect, $data['lecturename']) . "', '" . mysqli_real_escape_string($mysqliconnect, $data['lecturedescr']) . "', '" . $_SESSION["neptun"] . "')";
-            $result = $mysqliconnect->query($insertCourseDataSql);
+
+        $coursename = mysqli_real_escape_string($mysqliconnect, $course['coursename']);
+        $coursedesc = mysqli_real_escape_string($mysqliconnect, $course['coursedesc']);
+        $courseid = mysqli_real_escape_string($mysqliconnect, $course['courseid']);
+        $response = (object) [
+            'msg' => new stdClass(),
+            'success' => new stdClass()
+        ];
+        $response->success = true;
+
+        try {
+            if ($courseid == "" || $coursename == "" || $coursedesc == "") {
+                throw new Exception("A tárgyadatokat kötelező kitölteni!");
+            }
+            $createdby = $_SESSION["neptun"];
+            $checkIfDuplicateSql = "SELECT count(1) as counter from course WHERE course_id = '" . $courseid . "' ";
+            if ($mysqliconnect->query($checkIfDuplicateSql)->fetch_array()['counter'] > 0) {
+                throw new Exception("Ez a tárgy már létezik!");
+            }
+            $insertNewCourseDataSql = "INSERT into course VALUES ('" . $courseid . "', '" . $coursename . "', '" . $coursedesc . "', '" . $createdby . "')";
+            $result = $mysqliconnect->query($insertNewCourseDataSql);
             $result ? null : $all_query_ok = false;
-        }
-        if (isset($data['lecturemax']) && $data['lecturemax'] != "" && isset($data['lecturemin']) && $data['lecturemin'] != "") {
-            $insertReqLectSql = "INSERT into course_requirement VALUES ('" . mysqli_real_escape_string($mysqliconnect, $data['lecturecode']) . "',
-            'ATTENDANCE_LECTURE', '" . mysqli_real_escape_string($mysqliconnect, $data['lecturemax']) . "',
-             '" . mysqli_real_escape_string($mysqliconnect, $data['lecturemin']) . "')";
-            $result = $mysqliconnect->query($insertReqLectSql);
-            $result ? null : $all_query_ok = false;
-        }
-        if (isset($data['practicemax']) && $data['practicemax'] != "" && isset($data['practicemin']) && $data['practicemin'] != "") {
-            $insertReqPractSql = "INSERT into course_requirement VALUES ('" . mysqli_real_escape_string($mysqliconnect, $data['lecturecode']) . "',
-            'ATTENDANCE_PRACTICE', '" . mysqli_real_escape_string($mysqliconnect, $data['practicemax']) . "',
-             '" . mysqli_real_escape_string($mysqliconnect, $data['practicemin']) . "')";
-            $result = $mysqliconnect->query($insertReqPractSql);
-            $result ? null : $all_query_ok = false;
-        }
-        if (isset($data['firstzhmax']) && $data['firstzhmax'] != "" && isset($data['firstzhmin']) && $data['firstzhmin'] != "") {
-            $insertReqFirstzhSql = "INSERT into course_requirement VALUES ('" . mysqli_real_escape_string($mysqliconnect, $data['lecturecode']) . "',
-            'FIRST_ZH', '" . mysqli_real_escape_string($mysqliconnect, $data['firstzhmax']) . "',
-             '" . mysqli_real_escape_string($mysqliconnect, $data['firstzhmin']) . "')";
-            $result = $mysqliconnect->query($insertReqFirstzhSql);
-            $result ? null : $all_query_ok = false;
-        }
-        if (isset($data['secondzhmax']) && $data['secondzhmax'] != "" && isset($data['secondzhmin']) && $data['secondzhmin'] != "") {
-            $insertReqFirstzhSql = "INSERT into course_requirement VALUES ('" . mysqli_real_escape_string($mysqliconnect, $data['lecturecode']) . "',
-            'SECOND_ZH', '" . mysqli_real_escape_string($mysqliconnect, $data['secondzhmax']) . "',
-             '" . mysqli_real_escape_string($mysqliconnect, $data['secondzhmin']) . "')";
-            $result = $mysqliconnect->query($insertReqFirstzhSql);
-            $result ? null : $all_query_ok = false;
-        }
-        if (isset($data['homeworkcheckbox']) && $data['homeworkcheckbox'] != "") {
-            $insertReqHomeworkSql = "INSERT into course_requirement VALUES ('" . mysqli_real_escape_string($mysqliconnect, $data['lecturecode']) . "',
-            'HOMEWORK', '1','1')";
-            $result = $mysqliconnect->query($insertReqHomeworkSql);
-            $result ? null : $all_query_ok = false;
+
+            foreach ($course['courselist'] as $insertlist) {
+                $requirementtype = mysqli_real_escape_string($mysqliconnect, $insertlist['requirementtype']);
+
+                if ($requirementtype != 'HOMEWORK') {
+                    $min = mysqli_real_escape_string($mysqliconnect, $insertlist['min_requirement']);
+                    $max = mysqli_real_escape_string($mysqliconnect, $insertlist['max_requirement']);
+                    $this->validateRequirement($min, $max);
+                } else {
+                    $min = 1;
+                    $max = 1;
+                }
+                $insertNewCourseReqDataSql = "INSERT into course_requirement VALUES ('" . $courseid . "', '" . $requirementtype . "', '" . $max . "', '" . $min . "')";
+                $result = $mysqliconnect->query($insertNewCourseReqDataSql);
+                $result ? null : $all_query_ok = false;
+            }
+        } catch (Exception $e) {
+            $response->msg = $e->getMessage();
+            $response->success = false;
+            $all_query_ok = false;
         }
         $all_query_ok ? $mysqliconnect->commit() : $mysqliconnect->rollback();
-        return $all_query_ok;
+        return $response;
     }
+
 
     public function loadCourseData()
     {
@@ -112,17 +125,36 @@ class Course extends DbConnect
 
     public function updateCourseAttendsData($courseid, $updatelist)
     {
+        $all_query_ok = true;
         $mysqliconnect = $this->connect();
-        foreach ($updatelist as $studentitem) {
-            $neptuncode = mysqli_real_escape_string($mysqliconnect, $studentitem['neptun_code']);
-            foreach ($studentitem['studprogress'] as $progressitem) {
-                $progress = mysqli_real_escape_string($mysqliconnect, $progressitem['progress']);
-                $reqtype = mysqli_real_escape_string($mysqliconnect, $progressitem['requirement_type']);
-                $updateCourseAttendDataSql =
-                    "UPDATE attend set progress = '" . $progress . "' WHERE neptun_code = '" . $neptuncode . "' and course_id = '" . $courseid . "' and requirement_type = '" . $reqtype . "'";
-                $result = $mysqliconnect->query($updateCourseAttendDataSql);
+        $mysqliconnect->autocommit(FALSE);
+
+        $response = (object) [
+            'msg' => new stdClass(),
+            'success' => new stdClass()
+        ];
+        $response->success = true;
+        try {
+            foreach ($updatelist as $studentitem) {
+                $neptuncode = mysqli_real_escape_string($mysqliconnect, $studentitem['neptun_code']);
+                foreach ($studentitem['studprogress'] as $progressitem) {
+                    $progress = mysqli_real_escape_string($mysqliconnect, $progressitem['progress']);
+                    if (!is_numeric($progress)) {
+                        throw new Exception("Csak számokkal lehet kitölteni !");
+                    }
+                    $reqtype = mysqli_real_escape_string($mysqliconnect, $progressitem['requirement_type']);
+                    $updateCourseAttendDataSql =
+                        "UPDATE attend set progress = '" . $progress . "' WHERE neptun_code = '" . $neptuncode . "' and course_id = '" . $courseid . "' and requirement_type = '" . $reqtype . "'";
+                    $mysqliconnect->query($updateCourseAttendDataSql);
+                }
             }
+        } catch (Exception $e) {
+            $response->msg = $e->getMessage();
+            $response->success = false;
+            $all_query_ok = false;
         }
+        $all_query_ok ? $mysqliconnect->commit() : $mysqliconnect->rollback();
+        return $response;
     }
 
     public function loadCourseDetails($courseid)
@@ -145,5 +177,111 @@ class Course extends DbConnect
         }
 
         return $data;
+    }
+
+    public function updateCourseDetailsData($coursedetails)
+    {
+
+        $all_query_ok = true;
+        $mysqliconnect = $this->connect();
+        $mysqliconnect->autocommit(FALSE);
+
+        $response = (object) [
+            'msg' => new stdClass(),
+            'success' => new stdClass()
+        ];
+        $response->success = true;
+
+        $coursename = mysqli_real_escape_string($mysqliconnect, $coursedetails['coursename']);
+        $coursedesc = mysqli_real_escape_string($mysqliconnect, $coursedetails['coursedesc']);
+        $courseid = mysqli_real_escape_string($mysqliconnect, $coursedetails['courseid']);
+        $updateCourse = "UPDATE course set course_name = '" . $coursename . "', course_description = '" . $coursedesc . "' WHERE course_id = '" . $courseid . "'";
+        $result = $mysqliconnect->query($updateCourse);
+        $result ? null : $all_query_ok = false;
+        try {
+            if ($coursename == "" || $coursedesc == "") {
+                throw new Exception("A tárgyadatokat kötelező kitölteni!");
+            }
+            foreach ($coursedetails['detailslist'] as $detailsitem) {
+                $requirementtype = mysqli_real_escape_string($mysqliconnect, $detailsitem['requirementtype']);
+                $todo = mysqli_real_escape_string($mysqliconnect, $detailsitem['todo']);
+
+                if ($requirementtype != 'HOMEWORK' && $todo != 'delete') {
+                    $min = mysqli_real_escape_string($mysqliconnect, $detailsitem['min_requirement']);
+                    $max = mysqli_real_escape_string($mysqliconnect, $detailsitem['max_requirement']);
+                } else {
+                    $min = 1;
+                    $max = 1;
+                }
+                if ($todo == 'update') {
+                    $this->validateRequirement($min, $max);
+                    $updateCourseReqSql = "UPDATE course_requirement set min_requirement = '" . $min . "', max_requirement = '" . $max . "' WHERE course_id = '" . $courseid . "' and
+                 requirement_type = '" . $requirementtype . "'";
+                    $updateresult = $mysqliconnect->query($updateCourseReqSql);
+                    $updateresult ? null : $all_query_ok = false;
+                } else if ($todo == 'insert') {
+                    $this->validateRequirement($min, $max);
+                    $insertCourseReqSql = "INSERT into course_requirement VALUES ('" . $courseid . "', '" . $requirementtype . "', '" . $max . "', '" . $min . "') ";
+                    $insertcoursereqresult = $mysqliconnect->query($insertCourseReqSql);
+                    $insertcoursereqresult ? null : $all_query_ok = false;
+
+                    $selectCourseAttendantsSql = "SELECT neptun_code FROM attend WHERE course_id = '" . $courseid . "' GROUP BY neptun_code";
+                    $result = $mysqliconnect->query($selectCourseAttendantsSql);
+                    while ($row = $result->fetch_object()) {
+                        $insertCourseAttendSql = "INSERT into attend VALUES ('" . $row->neptun_code . "','" . $courseid . "','" . $requirementtype . "', 0)";
+                        $insertcourseattandresult = $mysqliconnect->query($insertCourseAttendSql);
+                        $insertcourseattandresult ? null : $all_query_ok = false;
+                    }
+                } else if ($todo == 'delete') {
+                    $deleteCourseAttendSql = "DELETE from attend WHERE course_id = '" . $courseid . "' and requirement_type = '" . $requirementtype . "'";
+                    $deletecourseattandresult = $mysqliconnect->query($deleteCourseAttendSql);
+                    $deletecourseattandresult ? null : $all_query_ok = false;
+
+                    $deleteCourseReqSql = "DELETE from course_requirement WHERE course_id = '" . $courseid . "' and requirement_type = '" . $requirementtype . "'";
+                    $deletecoursereqresult = $mysqliconnect->query($deleteCourseReqSql);
+                    $deletecoursereqresult ? null : $all_query_ok = false;
+                }
+            }
+        } catch (Exception $e) {
+            $response->msg = $e->getMessage();
+            $response->success = false;
+            $all_query_ok = false;
+        }
+        $all_query_ok ? $mysqliconnect->commit() : $mysqliconnect->rollback();
+        return $response;
+    }
+
+    public function deleteCourseData($courseid)
+    {
+        $all_query_ok = true;
+        $mysqliconnect = $this->connect();
+        $mysqliconnect->autocommit(FALSE);
+
+        $response = (object) [
+            'msg' => new stdClass(),
+            'success' => new stdClass()
+        ];
+        $response->success = true;
+        $courseid = mysqli_real_escape_string($mysqliconnect, $courseid);
+
+        $deleteCourseAttendSql = "DELETE FROM attend WHERE course_id = '" . $courseid . "'";
+        $deleteresult = $mysqliconnect->query($deleteCourseAttendSql);
+        $deleteresult ? null : $all_query_ok = false;
+
+        $deleteCourseReqSql = "DELETE FROM course_requirement WHERE course_id = '" . $courseid . "'";
+        $deleteresult = $mysqliconnect->query($deleteCourseReqSql);
+        $deleteresult ? null : $all_query_ok = false;
+
+        $deleteCourseDoc = "DELETE FROM course_document WHERE course_id = '" . $courseid . "'";
+        $result = $mysqliconnect->query($deleteCourseDoc);
+        $result ? null : $all_query_ok = false;
+
+
+        $deleteCourse = "DELETE FROM course WHERE course_id = '" . $courseid . "'";
+        $result = $mysqliconnect->query($deleteCourse);
+        $result ? null : $all_query_ok = false;
+
+        $all_query_ok ? $mysqliconnect->commit() : $mysqliconnect->rollback();
+        return $response;
     }
 }

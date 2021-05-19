@@ -12,9 +12,9 @@
     <link rel="stylesheet" type="text/css" href="../../CSS/course.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-    <script src="../../Javascript/manageattends.js"></script>
-    <script src="../../Javascript/managecourse.js"></script>
-    <script src="../../Javascript/managedocuments.js"></script>
+    <script src="../../Javascript/Professor/manageattends.js"></script>
+    <script src="../../Javascript/Professor/managecourse.js"></script>
+    <script src="../../Javascript/Professor/managedocuments.js"></script>
     <script src="../../Javascript/sessioncheck.js"></script>
 </head>
 
@@ -37,10 +37,14 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#">Üzenetek</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="LogOut()">Kijelentkezés</a>
+                </li>
             </ul>
         </div>
     </nav>
-
+    <h2>Oktatott tárgyak</h2>
+    <br>
     <div id="courses-container">
 
     </div>
@@ -59,6 +63,7 @@
 
                 </div>
                 <div class="modal-footer">
+                    <div id="succes-modifyattend-div"></div>
                     <button type="button" id="upd" class="btn btn-primary" onclick="updateAttends()">Frissítés</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Bezárás</button>
                 </div>
@@ -101,7 +106,7 @@
 
                 </div>
                 <div class="modal-body course-modal-body">
-                    <div class="container">
+                    <div id="course-details-formdata" class="container">
 
                         <div class="row">
                             <div class="col-md-6">
@@ -124,66 +129,73 @@
                                         placeholder="Leírás*"></textarea>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div id="requirement-formdata" class="col-md-6">
                                 <u>
                                     <h3>Követelmények</h3>
                                 </u>
 
                                 <div id="ATTENDANCE_LECTURE" class="form-group">
-                                    <input class="checkbox" type="checkbox" name="lecturecheckbox" />
+                                    <input class="checkbox" type="checkbox" name="requirementtype_attendance_lecture" />
                                     <label>Előadás</label>
-                                    <div id="showlecture">
+                                    <div id="attendance_lecture_div">
                                         <label>Összes óraszám</label>
-                                        <input class="form-control form-data-item max_requirement" name="lecturemax"
-                                            type="text" placeholder="Összes óraszám*" />
+                                        <input class="form-control form-data-item max_requirement"
+                                            name="maxrequirement_attendance_lecture" type="text"
+                                            placeholder="Összes óraszám*" />
                                         <label>Minimum kötelező</label>
-                                        <input class="form-control form-data-item min_requirement" name="lecturemin"
-                                            type="text" placeholder="Minimum kötelező*" />
+                                        <input class="form-control form-data-item min_requirement"
+                                            name="minrequirement_attendance_lecture" type="text"
+                                            placeholder="Minimum kötelező*" />
                                     </div>
                                 </div>
 
                                 <div id="ATTENDANCE_PRACTICE" class="form-group">
-                                    <input class="checkbox" type="checkbox" name="practicecheckbox" />
+                                    <input class="checkbox" type="checkbox"
+                                        name="requirementtype_attendance_practice" />
                                     <label>Gyakorlat</label>
-                                    <div id="showpractice">
+                                    <div id="attendance_practice_div">
                                         <label>Összes óraszám</label>
-                                        <input class="form-control form-data-item max_requirement" name="practicemax"
-                                            type="text" placeholder="Összes óraszám*" />
+                                        <input class="form-control form-data-item max_requirement"
+                                            name="maxrequirement_attendance_practice" type="text"
+                                            placeholder="Összes óraszám*" />
                                         <label>Minimum kötelező</label>
-                                        <input class="form-control form-data-item min_requirement" name="practicemin"
-                                            type="text" placeholder="Minimum kötelező*" />
+                                        <input class="form-control form-data-item min_requirement"
+                                            name="minrequirement_attendance_practice" type="text"
+                                            placeholder="Minimum kötelező*" />
                                     </div>
                                 </div>
 
                                 <div id="FIRST_ZH" class="form-group">
-                                    <input class="checkbox" type="checkbox" name="firstzhcheckbox" />
+                                    <input class="checkbox" type="checkbox" name="requirementtype_first_zh" />
                                     <label>I. ZH</label>
-                                    <div id="showfirstzh">
+                                    <div id="first_zh_div">
                                         <label>I. ZH max pontszám</label>
-                                        <input class="form-control form-data-item max_requirement" name="firstzhmax"
-                                            type="text" placeholder="Max pontszám*" />
+                                        <input class="form-control form-data-item max_requirement"
+                                            name="maxrequirement_first_zh" type="text" placeholder="Max pontszám*" />
                                         <label>I. ZH minimum pontszám</label>
-                                        <input class="form-control form-data-item min_requirement" name="firstzhmin"
-                                            type="text" placeholder="Minimum pontszám*" />
+                                        <input class="form-control form-data-item min_requirement"
+                                            name="minrequirement_first_zh" type="text"
+                                            placeholder="Minimum pontszám*" />
                                     </div>
                                 </div>
 
                                 <div id="SECOND_ZH" class="form-group">
-                                    <input class="checkbox" type="checkbox" name="secondzhcheckbox" />
+                                    <input class="checkbox" type="checkbox" name="requirementtype_second_zh" />
                                     <label>II. ZH</label>
-                                    <div id="showsecondzh">
+                                    <div id="second_zh_div">
                                         <label>II. ZH max pontszám</label>
-                                        <input class="form-control form-data-item max_requirement" name="secondzhmax"
-                                            type="text" placeholder="Max pontszám*" />
+                                        <input class="form-control form-data-item max_requirement"
+                                            name="maxrequirement_second_zh" type="text" placeholder="Max pontszám*" />
                                         <label>II. ZH minimum pontszám</label>
-                                        <input class="form-control form-data-item min_requirement" name="secondzhmin"
-                                            type="text" placeholder="Minimum pontszám*" />
+                                        <input class="form-control form-data-item min_requirement"
+                                            name="minrequirement_second_zh" type="text"
+                                            placeholder="Minimum pontszám*" />
                                     </div>
                                 </div>
 
                                 <div id="HOMEWORK" class="form-group">
-                                    <input class="checkbox" value="false" class="form-data-item" type="checkbox"
-                                        name="homeworkcheckbox" />
+                                    <input class="checkbox" class="form-data-item" type="checkbox"
+                                        name="requirementtype_homework" />
                                     <label>Félévközi feladat</label>
 
                                 </div>
@@ -193,6 +205,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <div id="succes-modify-div"></div>
                     <button type="button" class="btn btn-primary" onclick="updateCourseDetails()">Módosítás</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Bezárás</button>
                 </div>

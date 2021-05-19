@@ -3,7 +3,7 @@ function LoadDocuments(courseid, course_name) {
     $.ajax({
         type: "POST",
         dataType: 'json',
-        url: '../../Controller/FileHandler.php',
+        url: '../../../Controller/FileHandler.php',
         data: {
             functionId: 'loaddocs',
             courseid: courseid
@@ -45,7 +45,7 @@ function uploadFile() {
     $.ajax({
         type: "POST",
         dataType: 'json',
-        url: '../../Controller/FileHandler.php',
+        url: '../../../Controller/FileHandler.php',
         cache: false,
         contentType: false,
         processData: false,
@@ -70,7 +70,7 @@ function deleteFile(courseid, filename) {
         $.ajax({
             type: "POST",
             dataType: 'json',
-            url: '../../Controller/FileHandler.php',
+            url: '../../../Controller/FileHandler.php',
             data: {
                 functionId: 'deletefile',
                 courseid: courseid,

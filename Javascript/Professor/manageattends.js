@@ -1,17 +1,17 @@
 let dbnames = {
     'ATTENDANCE_LECTURE': 'Előadás jelenlét',
     'ATTENDANCE_PRACTICE': 'Gyakorlat jelenlét',
-    'FIRSTZH': 'I. ZH pontszám',
-    'SECONDZH': 'II. ZH pontszám',
+    'FIRST_ZH': 'I. ZH pontszám',
+    'SECOND_ZH': 'II. ZH pontszám',
     'HOMEWORK': 'Féléves feladat'
 };
 
 function LoadCourseAttends(courseid, course_name) {
-
+    $('#succes-modifyattend-div').empty();
     $.ajax({
         type: "POST",
         dataType: 'json',
-        url: '../../Controller/CourseHandler.php',
+        url: '../../../Controller/CourseHandler.php',
         data: {
             functionId: 'loadcourseattends',
             courseid: courseid
@@ -73,44 +73,62 @@ function LoadCourseAttends(courseid, course_name) {
 function updateAttends() {
 
     let studentlist = [];
-    $('table tbody').find('tr').each(function (i) {
-        let studprogress = [];
-        let studentobj = {};
-        studentobj.neptun_code = document.getElementById('stdn_' + i).innerHTML;
-        let elements = $(this).find('input')
+    try {
+        $('table tbody').find('tr').each(function (i) {
+            let studprogress = [];
+            let studentobj = {};
+            studentobj.neptun_code = document.getElementById('stdn_' + i).innerHTML;
+            let elements = $(this).find('input')
 
-        if (elements.length > 0) {
-            let serialized = $(this).find('input').serialize();
-            //a serialize nem dolgozza fel a false checkboxot ezér ez van :
-            if (!serialized.includes('HOMEWORK')) {
-                serialized += '&HOMEWORK=0';
+            if (elements.length > 0) {
+                let serialized = $(this).find('input').serialize();
+                //a serialize nem dolgozza fel a false checkboxot ezér ez van :
+                if (!serialized.includes('HOMEWORK')) {
+                    serialized += '&HOMEWORK=0';
+                }
+
+                studprogress = attendsToDictionary(serialized);
             }
-            studprogress = toDictionary(serialized);
-        }
-        studentobj.studprogress = studprogress;
-        studentlist.push(studentobj);
-    });
+            studentobj.studprogress = studprogress;
+            for (j = 0; j < studentobj.studprogress.length; j++) {
+                if (isNaN(studentobj.studprogress[j].progress)) {
+                    alert('Csak számokkal lehet kitölteni!');
+                    throw BreakException;
+                }
+            }
+            studentlist.push(studentobj);
+        });
+
+    } catch (e) {
+        // try catch a ciklusból való kiugrásra, return helyett
+        return;
+    }
 
     let courseid = document.getElementById('mcourseid').innerHTML;
     $.ajax({
         type: "POST",
         dataType: 'json',
-        url: '../../Controller/CourseHandler.php',
+        url: '../../../Controller/CourseHandler.php',
         data: {
             functionId: 'updatecourseattends',
             courseid: courseid,
             updatelist: studentlist
         },
         success: function (data) {
-            console.log(data);
+            if (data.success == true) {
+                $('#succes-modifyattend-div').append('Sikeres módosítás!');
+            } else {
+                alert(data.msg);
+            }
+
         }
     });
 
 
 }
-function toDictionary(query) {
+function attendsToDictionary(query) {
     let progresslist = [];
-    let items = query.split("&"); // split
+    let items = query.split("&");
     for (let i = 0; i < items.length; i++) {
         let progressitem = {};
         let values = items[i].split("=");

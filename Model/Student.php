@@ -16,6 +16,9 @@ class Student extends DbConnect
         if ($row) {
 
             if (password_verify($pswd, $row['password'])) {
+                session_start();
+                $_SESSION["neptun"] = $clearneptun;
+                $_SESSION['last_activity'] = time();
                 return true;
             } else {
                 return false;
