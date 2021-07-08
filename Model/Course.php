@@ -84,13 +84,13 @@ class Course extends DbConnect
         ];
 
         while ($courseobj = $result->fetch_object()) {
-            $selectCourseReq = "SELECT requirement_type, max_requirement, min_requirement FROM course_requirement where course_id = '" . $courseobj->course_id . "'";
+            /* $selectCourseReq = "SELECT requirement_type, max_requirement, min_requirement FROM course_requirement where course_id = '" . $courseobj->course_id . "'";
             $requirementresult = $mysqliconnect->query($selectCourseReq);
             $courseobj->requirement = array();
 
             while ($requirementobj = $requirementresult->fetch_object()) {
                 array_push($courseobj->requirement, $requirementobj);
-            }
+            } */
 
             array_push($data->courselist, $courseobj);
         }
@@ -282,6 +282,116 @@ class Course extends DbConnect
         $result ? null : $all_query_ok = false;
 
         $all_query_ok ? $mysqliconnect->commit() : $mysqliconnect->rollback();
+        return $response;
+    }
+
+    public function loadStudentMyCourseData()
+    {
+        session_start();
+        $mysqliconnect = $this->connect();
+        $selectMyCourseDataSql = "SELECT course_id, course_name, course_description FROM course WHERE course_id in ( SELECT course_id FROM attend WHERE neptun_code = '" . $_SESSION["neptun"] . "' )";
+        $result = $mysqliconnect->query($selectMyCourseDataSql);
+
+        $data = (object) [
+            'courselist' => array()
+        ];
+
+        while ($courseobj = $result->fetch_object()) {
+            $selectProgressFlag = "SELECT count(1) as attendflag from attend where course_id = '" . $courseobj->course_id . "' and neptun_code = '" . $_SESSION["neptun"] . "' and progress > 0";
+            $flagresult = $mysqliconnect->query($selectProgressFlag);
+            $row = $flagresult->fetch_assoc();
+            $courseobj->isProgressed = $row['attendflag'] > 0 ? true : false;
+            array_push($data->courselist, $courseobj);
+        }
+        return $data;
+    }
+
+    public function loadAvailableCoursesData()
+    {
+        session_start();
+        $mysqliconnect = $this->connect();
+        $selectMyCourseDataSql = "SELECT course_id, course_name, course_description  FROM course";
+        $result = $mysqliconnect->query($selectMyCourseDataSql);
+
+        $data = (object) [
+            'courselist' => array()
+        ];
+
+        while ($courseobj = $result->fetch_object()) {
+            $selectRegisteredFlag = "SELECT count(1) as flag from attend where course_id = '" . $courseobj->course_id . "' and neptun_code = '" . $_SESSION["neptun"] . "'";
+            $flagresult = $mysqliconnect->query($selectRegisteredFlag);
+            $row = $flagresult->fetch_assoc();
+            $courseobj->isRegistered = $row['flag'] > 0 ? true : false;
+            array_push($data->courselist, $courseobj);
+        }
+        return $data;
+    }
+
+    public function showCourseInfoData($courseid)
+    {
+        $mysqliconnect = $this->connect();
+        $selectCourseReqInfoSql = "SELECT requirement_type, max_requirement, min_requirement FROM `course_requirement` WHERE course_id ='" . $courseid . "'";
+
+        $result = $mysqliconnect->query($selectCourseReqInfoSql);
+
+        $data = (object) [
+            'infolist' => array()
+        ];
+
+        while ($courseobj = $result->fetch_object()) {
+
+            array_push($data->infolist, $courseobj);
+        }
+        return $data;
+    }
+
+    public function registerStudentData($courseid)
+    {
+        session_start();
+        $mysqliconnect = $this->connect();
+        $courseid = mysqli_real_escape_string($mysqliconnect, $courseid);
+        $insertStudentSql = "INSERT into attend (neptun_code, course_id, requirement_type, progress) (select '" . $_SESSION["neptun"] . "', '" . $courseid . "', requirement_type, 0 from course_requirement where course_id = '" . $courseid . "')";
+
+        $result = $mysqliconnect->query($insertStudentSql);
+    }
+
+    public function deleteCourseAttendData($courseid)
+    {
+        session_start();
+        $mysqliconnect = $this->connect();
+
+        $response = (object) [
+            'success' => new stdClass()
+        ];
+        $response->success = true;
+        $courseid = mysqli_real_escape_string($mysqliconnect, $courseid);
+
+        $deleteCourseAttendSql = "DELETE FROM attend WHERE neptun_code = '" . $_SESSION["neptun"] . "' and course_id = '" . $courseid . "'";
+        $deleteresult = $mysqliconnect->query($deleteCourseAttendSql);
+        $deleteresult ? $response->success = true : $response->success = false;
+
+        return $response;
+    }
+
+    public function showMyProgressData($courseid)
+    {
+        session_start();
+        $mysqliconnect = $this->connect();
+
+        $response = (object) [
+            'success' => new stdClass(),
+            'requirementprogress' => array()
+        ];
+        $response->success = true;
+        $courseid = mysqli_real_escape_string($mysqliconnect, $courseid);
+
+        $progressSql = "SELECT a.requirement_type, a.progress, cr.min_requirement, cr.max_requirement FROM attend a, course_requirement cr WHERE a.neptun_code = '" . $_SESSION["neptun"] . "' AND cr.course_id = '" . $courseid . "' AND a.requirement_type = cr.requirement_type";
+        $progressresult = $mysqliconnect->query($progressSql);
+
+        while ($progressobj = $progressresult->fetch_object()) {
+            array_push($response->requirementprogress, $progressobj);
+        }
+
         return $response;
     }
 }

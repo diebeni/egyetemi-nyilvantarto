@@ -54,7 +54,7 @@ function LoadCourse() {
     $.ajax({
         type: "POST",
         dataType: 'json',
-        url: '../../../Controller/CourseHandler.php',
+        url: '../../Controller/CourseHandler.php',
         data: {
             functionId: 'loadcourse'
 
@@ -95,7 +95,7 @@ function LoadCourseDetails(courseid) {
     $.ajax({
         type: "POST",
         dataType: 'json',
-        url: '../../../Controller/CourseHandler.php',
+        url: '../../Controller/CourseHandler.php',
         data: {
             functionId: 'loadcoursedetails',
             courseid: courseid
@@ -199,7 +199,7 @@ function updateCourseDetails() {
     $.ajax({
         type: "POST",
         dataType: 'json',
-        url: '../../../Controller/CourseHandler.php',
+        url: '../../Controller/CourseHandler.php',
         data: {
             functionId: 'modifycourse',
             coursedetails: details
@@ -253,7 +253,7 @@ function DeleteCourse(courseid) {
         $.ajax({
             type: "POST",
             dataType: 'json',
-            url: '../../../Controller/CourseHandler.php',
+            url: '../../Controller/CourseHandler.php',
             data: {
                 functionId: 'deletecourse',
                 courseid: courseid

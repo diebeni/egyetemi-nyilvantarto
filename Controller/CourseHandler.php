@@ -25,6 +25,24 @@ if (isset($_POST['functionId'])) {
     if ($_POST['functionId'] == 'deletecourse') {
         deleteCourse($_POST['courseid']);
     }
+    if ($_POST['functionId'] == 'loadstudentmycourse') {
+        loadStudentMyCourse();
+    }
+    if ($_POST['functionId'] == 'loadavailablecourses') {
+        loadAvailableCourses();
+    }
+    if ($_POST['functionId'] == 'showcourseinfo') {
+        showCourseInfo($_POST['courseid']);
+    }
+    if ($_POST['functionId'] == 'registerstudent') {
+        registerStudent($_POST['courseid']);
+    }
+    if ($_POST['functionId'] == 'deletecourseattend') {
+        deleteCourseattend($_POST['courseid']);
+    }
+    if ($_POST['functionId'] == 'showmyprogress') {
+        showMyProgress($_POST['courseid']);
+    }
 }
 
 function registerCourse($newcourse)
@@ -67,4 +85,40 @@ function deleteCourse($courseid)
 {
     $course = new Course();
     echo json_encode($course->deleteCourseData($courseid));
+}
+
+function loadStudentMyCourse()
+{
+    $course = new Course();
+    echo json_encode($course->loadStudentMyCourseData());
+}
+
+function loadAvailableCourses()
+{
+    $course = new Course();
+    echo json_encode($course->loadAvailableCoursesData());
+}
+
+function showCourseInfo($courseid)
+{
+    $course = new Course();
+    echo json_encode($course->showCourseInfoData($courseid));
+}
+
+function registerStudent($courseid)
+{
+    $course = new Course();
+    echo json_encode($course->registerStudentData($courseid));
+}
+
+function deleteCourseattend($courseid)
+{
+    $course = new Course();
+    echo json_encode($course->deleteCourseAttendData($courseid));
+}
+
+function showMyProgress($courseid)
+{
+    $course = new Course();
+    echo json_encode($course->showMyProgressData($courseid));
 }

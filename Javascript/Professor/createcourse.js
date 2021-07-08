@@ -109,7 +109,7 @@ function CreateCourse() {
     $.ajax({
         type: "POST",
         dataType: 'json',
-        url: '../../../Controller/CourseHandler.php',
+        url: '../../Controller/CourseHandler.php',
         data: {
             functionId: 'createcourse',
             data: course

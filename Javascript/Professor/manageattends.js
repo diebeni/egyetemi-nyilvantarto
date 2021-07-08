@@ -11,7 +11,7 @@ function LoadCourseAttends(courseid, course_name) {
     $.ajax({
         type: "POST",
         dataType: 'json',
-        url: '../../../Controller/CourseHandler.php',
+        url: '../../Controller/CourseHandler.php',
         data: {
             functionId: 'loadcourseattends',
             courseid: courseid
@@ -108,7 +108,7 @@ function updateAttends() {
     $.ajax({
         type: "POST",
         dataType: 'json',
-        url: '../../../Controller/CourseHandler.php',
+        url: '../../Controller/CourseHandler.php',
         data: {
             functionId: 'updatecourseattends',
             courseid: courseid,
