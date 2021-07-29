@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tárgynyilvántartó</title>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link rel="stylesheet" type="text/css" href="CSS/global.css">
+    <link rel="stylesheet" type="text/css" href="CSS/login.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <script src="Javascript/adminlogin.js"></script>
+</head>
+
+<body>
+    <div class="container login-container">
+
+        <div class="col-md-6 ">
+            <h3>ADMIN</h3>
+
+            <div class="form-group">
+                <input type="text" id="adminid" class="form-control" placeholder="ID* " value="" />
+            </div>
+            <div class="form-group">
+                <input type="password" id="admindpswd" class="form-control" placeholder="Jelszó *" value="" />
+            </div>
+            <div class="form-group">
+                <input type="submit" class="btnSubmit" value="Bejelentkezés" onclick="LoginAdmin()" />
+            </div>
+
+        </div>
+
+
+    </div>
+</body>
+
+</html>

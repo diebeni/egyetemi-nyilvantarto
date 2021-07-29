@@ -144,6 +144,7 @@
 		bottom: -15px;
 		color: rgba(255,255,255,0.5);
 		font-size: 10px;
+		min-width: max-content;
 	}
 	.msg_head{
 		position: relative;
@@ -168,4 +169,8 @@ border-radius: 5px 5px 5px 5px !important;
 
 	.searchcontacts:hover {
     background-color: rgba(25, 136, 191, 0.7);
+}
+
+.unseen-message-class{
+	border: 3px solid red !important;
 }

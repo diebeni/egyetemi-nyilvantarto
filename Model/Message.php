@@ -58,9 +58,9 @@ class Message extends DbConnect
         $clearmessagetext = mysqli_real_escape_string($mysqliconnect, $messagetext);
         $clearcontactid = mysqli_real_escape_string($mysqliconnect, $contactid);
         if ($messageid == "null") {
-            $sql = "INSERT INTO MESSAGE (MESSAGE_ID, MESSAGE_FROM, MESSAGE_TO, MESSAGE_CONTENT, SENDING_DATE)  (" .  $clearmessageid . ",'" . $_SESSION["neptun"] . "','" . $clearcontactid . "','" . $clearmessagetext . "',CURRENT_TIMESTAMP() from message);";
+            $sql = "INSERT INTO MESSAGE (MESSAGE_ID, MESSAGE_FROM, MESSAGE_TO, MESSAGE_CONTENT, SENDING_DATE, IS_SEEN)  (" .  $clearmessageid . ",'" . $_SESSION["neptun"] . "','" . $clearcontactid . "','" . $clearmessagetext . "',CURRENT_TIMESTAMP(), 0 from message);";
         } else {
-            $sql = "INSERT INTO MESSAGE (MESSAGE_ID, MESSAGE_FROM, MESSAGE_TO, MESSAGE_CONTENT, SENDING_DATE) VALUES (" .  $clearmessageid . ",'" . $_SESSION["neptun"] . "','" . $clearcontactid . "','" . $clearmessagetext . "',CURRENT_TIMESTAMP());";
+            $sql = "INSERT INTO MESSAGE (MESSAGE_ID, MESSAGE_FROM, MESSAGE_TO, MESSAGE_CONTENT, SENDING_DATE, IS_SEEN) VALUES (" .  $clearmessageid . ",'" . $_SESSION["neptun"] . "','" . $clearcontactid . "','" . $clearmessagetext . "',CURRENT_TIMESTAMP(), 0);";
         }
         $mysqliconnect->query($sql);
 
@@ -97,6 +97,57 @@ class Message extends DbConnect
         $sql = "SELECT distinct message_id from message where (message_from = '" . $clearcheckinput . "' and message_to = '" . $_SESSION["neptun"] . "') or (message_from = '" .  $_SESSION["neptun"] . "' and message_to = '" . $clearcheckinput . "')";
         $result = $mysqliconnect->query($sql);
 
-        return $result->fetch_object();;
+        return $result->fetch_object();
+    }
+
+    public function CheckNewMessageData()
+    {
+        session_start();
+        $mysqliconnect = $this->connect();
+
+        $sql = "SELECT distinct message_id from message where  message_to = '" . $_SESSION["neptun"] . "' and is_seen = 0";
+        $result = $mysqliconnect->query($sql);
+
+        $data = (object) [
+            'unseenmessageids' => array()
+        ];
+        while ($messageidobj = $result->fetch_object()) {
+
+            array_push($data->unseenmessageids, $messageidobj);
+        }
+
+        return $data;
+    }
+
+    public function UpdateIsSeenStatusData($messageid)
+    {
+        session_start();
+        $mysqliconnect = $this->connect();
+        $clearmessageid = mysqli_real_escape_string($mysqliconnect, $messageid);
+
+        $sql = "UPDATE message SET is_seen = 1 where message_to = '" . $_SESSION["neptun"] . "' and message_id = '" . $clearmessageid . "'";
+        $mysqliconnect->query($sql);
+    }
+
+    public function GetNewMessagesData($messageid)
+    {
+        session_start();
+        $mysqliconnect = $this->connect();
+        $clearmessageid = mysqli_real_escape_string($mysqliconnect, $messageid);
+
+        $sql = "SELECT 	* from message where message_id = '" . $clearmessageid . "' and is_seen = 0 and message_to = '" . $_SESSION["neptun"] . "' and message_from <> '" . $_SESSION["neptun"] . "' order by sending_date";
+        $result = $mysqliconnect->query($sql);
+
+        $sql = "UPDATE message SET is_seen = 1 where message_id = '" . $clearmessageid . "' and is_seen = 0 and message_to = '" . $_SESSION["neptun"] . "' ";
+        $mysqliconnect->query($sql);
+
+        $data = (object) [
+            'newmessages' => array()
+        ];
+        while ($messageobj = $result->fetch_object()) {
+            array_push($data->newmessages, $messageobj);
+        }
+
+        return $data;
     }
 }

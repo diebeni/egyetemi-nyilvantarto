@@ -34,6 +34,7 @@ function LoadContacts() {
                 isFirstItem = false;
             });
             $('.contacts').append(content);
+            checkUnseenMessages();
             loadMessage(messageid, contactname, contactid);
         }
     });
@@ -44,6 +45,7 @@ function loadMessage(messageid, contactname, contactid) {
         document.getElementsByClassName("active_message")[0].classList.remove("active_message");
         document.getElementById("message_" + messageid).classList.add("active_message");
         document.getElementById('message-content').value = "";
+
     }
     $(".display").empty();
     $.ajax({
@@ -55,6 +57,8 @@ function loadMessage(messageid, contactname, contactid) {
             messageid: messageid
         },
         success: function (data) {
+            document.getElementById('message_' + messageid).getElementsByClassName('user_img')[0].classList.remove('unseen-message-class');
+            updateMessageStatus(messageid);
             $('.chat_message_container').empty();
             $('.chat_box_user').empty();
             let content = '';
@@ -80,7 +84,6 @@ function loadMessage(messageid, contactname, contactid) {
 
             $('.chat_message_container').append(content);
             $('.chat_message_container')[0].scrollTop = $('.chat_message_container')[0].scrollHeight;
-            console.log(data);
         }
     });
 }
@@ -90,34 +93,34 @@ function sendMessage() {
     let contactid = document.getElementById('message-contact-id').innerHTML;
     let messageid = document.getElementById('message-id').innerHTML;
 
+    if (messagetext.length > 0) {
+        $.ajax({
+            type: "POST",
+            dataType: 'json',
+            url: '../../Controller/MessageHandler.php',
+            data: {
+                functionId: 'sendmessage',
+                messagetext: messagetext,
+                contactid: contactid,
+                messageid: messageid
+            },
+            success: function (data) {
+                let senttime = new Date().toLocaleString('sv-SE').slice(0, -3);
+                if (data) {
+                    document.getElementById('message-content').value = "";
+                    let content = '<div class="d-flex justify-content-end mb-4">'
+                        + '<div class="msg_cotainer_send">'
+                        + messagetext
+                        + '<span class="msg_time_send">' + senttime + '</span>'
+                        + '</div>'
+                        + '</div>';
 
-    $.ajax({
-        type: "POST",
-        dataType: 'json',
-        url: '../../Controller/MessageHandler.php',
-        data: {
-            functionId: 'sendmessage',
-            messagetext: messagetext,
-            contactid: contactid,
-            messageid: messageid
-        },
-        success: function (data) {
-            let senttime = new Date().toLocaleString('sv-SE').slice(0, -3);
-            if (data) {
-                document.getElementById('message-content').value = "";
-                let content = '<div class="d-flex justify-content-end mb-4">'
-                    + '<div class="msg_cotainer_send">'
-                    + messagetext
-                    + '<span class="msg_time_send">' + senttime + '</span>'
-                    + '</div>'
-                    + '</div>';
-
-                $('.chat_message_container').append(content);
-                $('.chat_message_container')[0].scrollTop = $('.chat_message_container')[0].scrollHeight;
+                    $('.chat_message_container').append(content);
+                    $('.chat_message_container')[0].scrollTop = $('.chat_message_container')[0].scrollHeight;
+                }
             }
-            console.log(data);
-        }
-    });
+        });
+    }
 }
 
 function checkContacts(neptuncode, contactname) {
@@ -165,3 +168,69 @@ $(document).ready(function () {
         }
     });
 });
+
+setInterval(() => {
+    checkUnseenMessages();
+    getNewMessages(document.getElementById('message-id').innerHTML);
+}, 5000);
+
+function checkUnseenMessages() {
+    $.ajax({
+        type: "POST",
+        dataType: 'json',
+        url: '../../Controller/MessageHandler.php',
+        data: {
+            functionId: 'checknewmessage'
+        },
+        success: function (data) {
+
+            data.unseenmessageids.forEach(function (item, i) {
+                if (!(document.getElementById("message_" + item.message_id).classList.contains("active_message"))) {
+                    document.getElementById('message_' + item.message_id).getElementsByClassName('user_img')[0].classList.add('unseen-message-class');
+                }
+            });
+
+        }
+    });
+}
+
+function updateMessageStatus(messageid) {
+    $.ajax({
+        type: "POST",
+        dataType: 'json',
+        url: '../../Controller/MessageHandler.php',
+        data: {
+            functionId: 'updatemessagestatus',
+            messageid: messageid
+        }
+    });
+}
+
+function getNewMessages(messageid) {
+    $.ajax({
+        type: "POST",
+        dataType: 'json',
+        url: '../../Controller/MessageHandler.php',
+        data: {
+            functionId: 'getnewmessages',
+            messageid: messageid
+        },
+        success: function (data) {
+            // ellenőrizni hogy még mindig ugyanabba a beszélgetésben van
+            if (messageid == document.getElementById('message-id').innerHTML) {
+                let content = "";
+                data.newmessages.forEach(function (item, i) {
+                    content += '<div class="d-flex justify-content-start mb-4">'
+                        + '<div class="msg_cotainer">'
+                        + item.message_content
+                        + '<span class="msg_time">' + item.sending_date.slice(0, -3) + '</span>'
+                        + '</div>'
+                        + '</div>';
+                });
+                $('.chat_message_container').append(content);
+                $('.chat_message_container')[0].scrollTop = $('.chat_message_container')[0].scrollHeight;
+            }
+        }
+    });
+}
+
